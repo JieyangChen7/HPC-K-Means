@@ -28,7 +28,14 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
     dataset(dataset),
     metric(metric),
     distanceCalculations(0)
-{ /* Nothing to do. */ }
+{ 
+  ddt.set_size(dataset.n_cols, 1);
+  arma::mat dataset_t = dataset.t()
+  for (size_t i = 0; i < dataset.n_cols; i++)
+  {
+    ddt(i, 1) = dataset_t.row(i) * dataset.col(i)
+  }
+/* Nothing to do. */ }
 
 // Run a single iteration.
 template<typename MetricType, typename MatType>
@@ -39,6 +46,36 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
   newCentroids.zeros(centroids.n_rows, centroids.n_cols);
   counts.zeros(centroids.n_cols);
 
+  arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
+  arma::mat cct(centroids.n_cols, 1);
+
+  arma::mat centroids_t = centroids.t();
+
+  //d * c^T
+  dist_matrix = dataset.t() * centroids;
+
+  // c * c^T
+  for (size_t i = 0; i < centroids.n_cols; i++)
+  {
+    cct(i, 1) = centroids_t.row(i) * centroids.col(i)
+  }
+
+  // d * c^T -> -2 * d * c^T
+  dist_matrix = -2 * dist_matrix;
+
+  //d * d^T - 2 * d * c^T
+  for (size_t i = 0; i < centroids.n_cols; i++)
+  {
+    dist_matrix.col(i) = dist_matrix.col(i) + ddt;
+  }
+
+  //d * d^T + c * c^T - 2 * d * c^T
+  for (size_t i = 0; i < dataset.n_cols; i++)
+  {
+    dist_matrix.row(i) = dist_matrix.row(i) + cct;
+  }
+
+
   // Find the closest centroid to each point and update the new centroids.
   for (size_t i = 0; i < dataset.n_cols; i++)
   {
@@ -48,8 +85,8 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
 
     for (size_t j = 0; j < centroids.n_cols; j++)
     {
-      const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
-
+      //const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
+      const double distance = pow(dist_matrix(i, j), (1.0 / Power);
       if (distance < minDistance)
       {
         minDistance = distance;
