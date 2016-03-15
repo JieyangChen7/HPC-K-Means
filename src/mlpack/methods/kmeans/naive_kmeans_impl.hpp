@@ -31,7 +31,7 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
 { 
   
   ddt.set_size(dataset.n_cols, 1);
-  Log::Info << ddt.n_rows << std::endl;
+  Log::Info << ddt.n_rows << "-" << ddt.n_cols << std::endl;
   arma::mat dataset_t = dataset.t();
    for (size_t i = 0; i < dataset.n_cols; i++)
    {
