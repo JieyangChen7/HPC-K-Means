@@ -66,7 +66,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
   		data_ptr, dataset_t.n_rows, 
   		cent_ptr, centroids.n_rows,
   		0.0,
-  		dist_ptr, dist_ptr.n_rows);
+  		dist_ptr, dist_matrix.n_rows);
 
 
 
