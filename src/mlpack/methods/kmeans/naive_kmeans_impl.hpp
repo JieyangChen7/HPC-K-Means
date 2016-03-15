@@ -41,7 +41,7 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
 
 // Run a single iteration.
 template<typename MetricType, typename MatType>
-double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
+double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
                                                  arma::mat& newCentroids,
                                                  arma::Col<size_t>& counts)
 {
@@ -55,7 +55,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
   //dist_matrix = dataset_t * centroids;
 
   double * data_ptr = dataset_t.memptr();
-  const double * cent_ptr = centroids.memptr();
+  double * cent_ptr = centroids.memptr();
   double * dist_ptr = dist_matrix.memptr();
 
   dgemm('N', 'N', 
