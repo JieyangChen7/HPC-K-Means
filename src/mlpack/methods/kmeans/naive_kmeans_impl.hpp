@@ -55,7 +55,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
   //dist_matrix = dataset_t * centroids;
 
   double * data_ptr = dataset_t.memptr();
-  double * cent_ptr = centroids.memptr();
+  const double * cent_ptr = centroids.memptr();
   double * dist_ptr = dist_matrix.memptr();
 
   dgemm('N', 'N', 
