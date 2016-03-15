@@ -1,0 +1,7 @@
+/var/spool/torque/mom_priv/jobs/92864.head.SC: line 0: unalias: gfortran49: not found
+/var/spool/torque/mom_priv/jobs/92864.head.SC: line 0: unalias: g++49: not found
+/var/spool/torque/mom_priv/jobs/92864.head.SC: line 0: unalias: gcc49: not found
+[0;31m[FATAL] [0mCannot open file 'data.csv'. 
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  fatal error; see Log::Fatal output
+./test.sh: line 2:  9859 Aborted                 (core dumped) ./a.out -c 1000 -i data.csv

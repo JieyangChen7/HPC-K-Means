@@ -1,0 +1,2 @@
+g++ test_matrix.cpp -I $ACMLDIR/gfortran64/include -I $PAPIDIR/src -lacml_mp -lpapi
+./a.out

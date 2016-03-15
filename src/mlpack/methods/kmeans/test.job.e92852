@@ -1,0 +1,9 @@
+/var/spool/torque/mom_priv/jobs/92852.head.SC: line 0: unalias: gfortran49: not found
+/var/spool/torque/mom_priv/jobs/92852.head.SC: line 0: unalias: g++49: not found
+/var/spool/torque/mom_priv/jobs/92852.head.SC: line 0: unalias: gcc49: not found
+cc1plus: error: unrecognized command line option '-std=c++11'
+./a.out: /act/gcc-4.6.2/lib64/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by ./a.out)
+./a.out: /act/gcc-4.6.2/lib64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by ./a.out)
+./a.out: /act/gcc-4.6.2/lib64/libgomp.so.1: version `GOMP_4.0' not found (required by /home/jchen098/KMEANS/mlpack-2.0.1/build/lib/libmlpack.so.2)
+./a.out: /act/gcc-4.6.2/lib64/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by /home/jchen098/KMEANS/mlpack-2.0.1/build/lib/libmlpack.so.2)
+./a.out: /act/gcc-4.6.2/lib64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by /home/jchen098/KMEANS/mlpack-2.0.1/build/lib/libmlpack.so.2)
