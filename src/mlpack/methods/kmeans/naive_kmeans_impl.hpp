@@ -63,8 +63,8 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
     cct(i, 0) = temp(0, 0);
   }
 
-  // // d * c^T -> -2 * d * c^T
-  // dist_matrix = -2 * dist_matrix;
+  // d * c^T -> -2 * d * c^T
+  dist_matrix = -2 * dist_matrix;
 
   // //d * d^T - 2 * d * c^T
   // for (size_t i = 0; i < centroids.n_cols; i++)
