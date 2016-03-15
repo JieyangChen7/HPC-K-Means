@@ -29,7 +29,7 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
     metric(metric),
     distanceCalculations(0)
 { 
-  ddt.set_size(dataset.n_cols, 1);
+  //ddt.set_size(dataset.n_cols, 1);
   //arma::mat dataset_t = dataset.t();
   // for (size_t i = 0; i < dataset.n_cols; i++)
   // {
