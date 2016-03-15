@@ -31,7 +31,7 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
 { 
   
   ddt.zeros(dataset.n_cols, 1);
-  arma::mat dataset_t = dataset.t();
+  dataset_t = dataset.t();
    for (size_t i = 0; i < dataset.n_cols; i++)
    {
      arma::mat temp = dataset_t.row(i) * dataset.col(i);
@@ -49,14 +49,30 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
    counts.zeros(centroids.n_cols);
 
   arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
-  arma::mat cct(1, centroids.n_cols);
-
-  arma::mat centroids_t = centroids.t();
+  
 
   //d * c^T
-  dist_matrix = dataset.t() * centroids;
+  //dist_matrix = dataset_t * centroids;
+
+  double * data_ptr = dataset_t.memptr();
+  double * cent_ptr = centroids.memptr();
+  double * dist_ptr = dist_matrix.memptr();
+
+  dgemm('N', 'N', 
+  		dataset_t.n_rows, 
+  		centroids.n_cols, 
+  		dataset_t.n_cols, 
+  		1.0,
+  		data_ptr, dataset_t.n_rows, 
+  		cent_ptr, centroids.n_rows,
+  		0.0,
+  		dist_ptr, dist_ptr.n_rows);
+
+
 
   // c * c^T
+  arma::mat cct(1, centroids.n_cols);
+  arma::mat centroids_t = centroids.t();
   for (size_t i = 0; i < centroids.n_cols; i++)
   {
     arma::mat temp = centroids_t.row(i) * centroids.col(i);
