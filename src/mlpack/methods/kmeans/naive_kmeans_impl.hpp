@@ -44,8 +44,8 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
                                                  arma::mat& newCentroids,
                                                  arma::Col<size_t>& counts)
 {
-  // newCentroids.zeros(centroids.n_rows, centroids.n_cols);
-  // counts.zeros(centroids.n_cols);
+   newCentroids.zeros(centroids.n_rows, centroids.n_cols);
+   counts.zeros(centroids.n_cols);
 
   // arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
   // arma::mat cct(centroids.n_cols, 1);
