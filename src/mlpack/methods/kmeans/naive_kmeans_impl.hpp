@@ -44,23 +44,23 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
                                                  arma::mat& newCentroids,
                                                  arma::Col<size_t>& counts)
 {
-  newCentroids.zeros(centroids.n_rows, centroids.n_cols);
-  counts.zeros(centroids.n_cols);
+  // newCentroids.zeros(centroids.n_rows, centroids.n_cols);
+  // counts.zeros(centroids.n_cols);
 
-  arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
-  arma::mat cct(centroids.n_cols, 1);
+  // arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
+  // arma::mat cct(centroids.n_cols, 1);
 
-  arma::mat centroids_t = centroids.t();
+  // arma::mat centroids_t = centroids.t();
 
-  //d * c^T
-  dist_matrix = dataset.t() * centroids;
+  // //d * c^T
+  // dist_matrix = dataset.t() * centroids;
 
-  // c * c^T
-  for (size_t i = 0; i < centroids.n_cols; i++)
-  {
-    arma::mat temp = centroids_t.row(i) * centroids.col(i);
-    cct(i, 1) = temp(0, 0);
-  }
+  // // c * c^T
+  // for (size_t i = 0; i < centroids.n_cols; i++)
+  // {
+  //   arma::mat temp = centroids_t.row(i) * centroids.col(i);
+  //   cct(i, 1) = temp(0, 0);
+  // }
 
   // // d * c^T -> -2 * d * c^T
   // dist_matrix = -2 * dist_matrix;
