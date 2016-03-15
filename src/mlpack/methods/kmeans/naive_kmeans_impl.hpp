@@ -89,7 +89,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
     for (size_t j = 0; j < centroids.n_cols; j++)
     {
       //const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
-      const double distance = pow(dist_matrix(i, j), (1.0 / 2.0);
+      const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
       if (distance < minDistance)
       {
         minDistance = distance;
