@@ -33,7 +33,7 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
   arma::mat dataset_t = dataset.t();
   for (size_t i = 0; i < dataset.n_cols; i++)
   {
-    ddt(i, 1) = dataset_t.row(i) * dataset.col(i)
+    ddt(i, 1) = dataset_t.row(i) * dataset.col(i);
   }
 /* Nothing to do. */ }
 
@@ -57,7 +57,8 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
   // c * c^T
   for (size_t i = 0; i < centroids.n_cols; i++)
   {
-    cct(i, 1) = centroids_t.row(i) * centroids.col(i);
+    arma::mat temp = centroids_t.row(i) * centroids.col(i);
+    cct(i, 1) = temp(0, 0);
   }
 
   // // d * c^T -> -2 * d * c^T
