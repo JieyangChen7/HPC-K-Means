@@ -29,12 +29,13 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
     metric(metric),
     distanceCalculations(0)
 { 
+  Log::Info << dataset.n_cols << std::endl;
   ddt.set_size(dataset.n_cols, 1);
   arma::mat dataset_t = dataset.t();
    for (size_t i = 0; i < dataset.n_cols; i++)
    {
      arma::mat temp = dataset_t.row(i) * dataset.col(i);
-     Log::Info << temp.n_rows << "-" << temp.n_cols << std::endl;
+     //Log::Info << temp.n_rows << "-" << temp.n_cols << std::endl;
      ddt(i, 1) = 1.0;
      //double x = temp(0, 0);
    }
