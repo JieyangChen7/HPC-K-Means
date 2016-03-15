@@ -59,6 +59,8 @@ class NaiveKMeans
 
   arma::mat ddt;
 
+  arma::mat dataset_t;
+
   //! The instantiated metric.
   MetricType& metric;
 
