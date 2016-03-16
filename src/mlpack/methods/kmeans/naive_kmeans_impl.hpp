@@ -147,7 +147,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
     for (size_t j = 0; j < centroids.n_cols; j++)
     {
-      const double distance = dist_matrix(i, j)
+      const double distance = dist_matrix(i, j);
       //const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
       if (distance < minDistance)
       {
