@@ -19,6 +19,7 @@
 // In case it hasn't been included yet.
 #include "naive_kmeans.hpp"
 #include "acml.h"
+#include "papi.h"
 namespace mlpack {
 namespace kmeans {
 
