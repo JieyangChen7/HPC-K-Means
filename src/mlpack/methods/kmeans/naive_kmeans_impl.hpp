@@ -121,18 +121,18 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
     {
       const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
       //const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
-      if (distance < minDistance)
-      {
-        minDistance = distance;
-        closestCluster = j;
-      }
+      // if (distance < minDistance)
+      // {
+      //   minDistance = distance;
+      //   closestCluster = j;
+      // }
     }
 
     Log::Assert(closestCluster != centroids.n_cols);
 
     // We now have the minimum distance centroid index.  Update that centroid.
-    newCentroids.col(closestCluster) += arma::vec(dataset.col(i));
-    counts(closestCluster)++;
+    //newCentroids.col(closestCluster) += arma::vec(dataset.col(i));
+    //counts(closestCluster)++;
   }
  
 
