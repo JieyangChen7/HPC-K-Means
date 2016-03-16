@@ -50,18 +50,14 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
    counts.zeros(centroids.n_cols);
 
 
-  //arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
+    arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
     float real_time = 0.0;
     float proc_time = 0.0;
     long long flpins = 0.0;
     float mflops = 0.0;
 
 
-   //timing start
-   if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-    }
+   
 
   
   
@@ -109,6 +105,38 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   //   dist_matrix.row(i) = dist_matrix.row(i) + cct;
   // }
 
+//timing start
+   if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+      std::cout << "PAPI ERROR" << std::endl;
+      //return -1;                                                                                                                                                                                                                           
+    }
+
+  //calculate distance
+  for (size_t i = 0; i < dataset.n_cols; i++)
+  {
+    // Find the closest centroid to this point.
+    for (size_t j = 0; j < centroids.n_cols; j++)
+    {
+      dist_matrix(i ,j) = metric.Evaluate(dataset.col(i), centroids.col(j));
+
+    }
+  }
+
+
+//timing end
+  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+      std::cout << "PAPI ERROR" << std::endl;
+      //return -1;                                                                                                                                                                                                                           
+  }
+  std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
+  PAPI_shutdown();
+
+  //timing start
+   if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+      std::cout << "PAPI ERROR" << std::endl;
+      //return -1;                                                                                                                                                                                                                           
+    }
+
 
   // Find the closest centroid to each point and update the new centroids.
   for (size_t i = 0; i < dataset.n_cols; i++)
@@ -119,30 +147,30 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
     for (size_t j = 0; j < centroids.n_cols; j++)
     {
-      const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
+      const double distance = dist_matrix(i, j)
       //const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
-      // if (distance < minDistance)
-      // {
-      //   minDistance = distance;
-      //   closestCluster = j;
-      // }
+      if (distance < minDistance)
+      {
+        minDistance = distance;
+        closestCluster = j;
+      }
     }
 
     Log::Assert(closestCluster != centroids.n_cols);
 
     // We now have the minimum distance centroid index.  Update that centroid.
-    //newCentroids.col(closestCluster) += arma::vec(dataset.col(i));
-    //counts(closestCluster)++;
+    newCentroids.col(closestCluster) += arma::vec(dataset.col(i));
+    counts(closestCluster)++;
   }
  
-
-   //timing end
+//timing end
   if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
       //return -1;                                                                                                                                                                                                                           
   }
   std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
   PAPI_shutdown();
+   
 
   // Now normalize the centroid.
   for (size_t i = 0; i < centroids.n_cols; ++i)
