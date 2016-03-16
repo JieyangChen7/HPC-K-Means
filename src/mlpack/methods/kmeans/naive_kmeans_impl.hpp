@@ -49,10 +49,13 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
    newCentroids.zeros(centroids.n_rows, centroids.n_cols);
    counts.zeros(centroids.n_cols);
 
+
+  arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
     float real_time = 0.0;
     float proc_time = 0.0;
     long long flpins = 0.0;
     float mflops = 0.0;
+
 
    //timing start
    if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
@@ -60,11 +63,11 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
       //return -1;                                                                                                                                                                                                                           
     }
 
-  //arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
+  
   
 
   //d * c^T
-  //dist_matrix = dataset_t * centroids;
+  dist_matrix = dataset_t * centroids;
 
   // double * data_ptr = dataset_t.memptr();
   // double * cent_ptr = centroids.memptr();
@@ -83,28 +86,28 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
 
   // c * c^T
-  //arma::mat cct(1, centroids.n_cols);
-  //arma::mat centroids_t = centroids.t();
-  // for (size_t i = 0; i < centroids.n_cols; i++)
-  // {
-  //   arma::mat temp = centroids_t.row(i) * centroids.col(i);
-  //   cct(0, i) = temp(0, 0);
-  // }
+  arma::mat cct(1, centroids.n_cols);
+  arma::mat centroids_t = centroids.t();
+  for (size_t i = 0; i < centroids.n_cols; i++)
+  {
+    arma::mat temp = centroids_t.row(i) * centroids.col(i);
+    cct(0, i) = temp(0, 0);
+  }
 
-  // // d * c^T -> -2 * d * c^T
-  // dist_matrix = -2 * dist_matrix;
+  // d * c^T -> -2 * d * c^T
+  dist_matrix = -2 * dist_matrix;
 
-  // // //d * d^T - 2 * d * c^T
-  // for (size_t i = 0; i < centroids.n_cols; i++)
-  // {
-  //   dist_matrix.col(i) = dist_matrix.col(i) + ddt;
-  // }
+  // //d * d^T - 2 * d * c^T
+  for (size_t i = 0; i < centroids.n_cols; i++)
+  {
+    dist_matrix.col(i) = dist_matrix.col(i) + ddt;
+  }
 
-  // //d * d^T + c * c^T - 2 * d * c^T
-  // for (size_t i = 0; i < dataset.n_cols; i++)
-  // {
-  //   dist_matrix.row(i) = dist_matrix.row(i) + cct;
-  // }
+  //d * d^T + c * c^T - 2 * d * c^T
+  for (size_t i = 0; i < dataset.n_cols; i++)
+  {
+    dist_matrix.row(i) = dist_matrix.row(i) + cct;
+  }
 
 
   // Find the closest centroid to each point and update the new centroids.
@@ -116,8 +119,8 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
     for (size_t j = 0; j < centroids.n_cols; j++)
     {
-      const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
-      //const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
+      //const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
+      const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
       if (distance < minDistance)
       {
         minDistance = distance;
