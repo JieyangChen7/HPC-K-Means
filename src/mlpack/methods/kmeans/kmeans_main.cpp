@@ -316,11 +316,11 @@ void RunKMeans(const InitialPartitionPolicy& ipp)
     float proc_time = 0.0;
     long long flpins = 0.0;
     float mflops = 0.0;
-    std::cout<<"start"<<std::endl;
-    if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-    }
+    // std::cout<<"start"<<std::endl;
+    // if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+    //   std::cout << "PAPI ERROR" << std::endl;
+    //   //return -1;                                                                                                                                                                                                                           
+    // }
 
     // Just save the centroids.
     kmeans.Cluster(dataset, clusters, centroids, initialCentroidGuess);
@@ -329,8 +329,8 @@ void RunKMeans(const InitialPartitionPolicy& ipp)
       //return -1;                                                                                                                                                                                                                           
     }
 
-    std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
-    PAPI_shutdown();
+    // std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
+    // PAPI_shutdown();
 
     Timer::Stop("clustering");
   }
