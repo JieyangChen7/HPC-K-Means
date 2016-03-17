@@ -108,6 +108,11 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
   PAPI_shutdown();
 
+
+  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+      std::cout << "PAPI ERROR" << std::endl;
+      //return -1;                                                                                                                                                                                                                           
+  }
   // c * c^T
   arma::mat cct(1, centroids.n_cols);
   arma::mat centroids_t = centroids.t();
