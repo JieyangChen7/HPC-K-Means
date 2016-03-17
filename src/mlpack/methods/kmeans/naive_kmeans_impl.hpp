@@ -51,65 +51,47 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
 
     arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
-    float real_time = 0.0;
-    float proc_time = 0.0;
-    long long flpins = 0.0;
-    float mflops = 0.0;
-
-
-   
-//timing start
-  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-    std::cout << "PAPI ERROR" << std::endl;
-    //return -1;                                                                                                                                                                                                                           
+    float gemm_real_time = 0.0;
+    float gemm_proc_time = 0.0;
+    long long gemm_flpins = 0.0;
+    float gemm_mflops = 0.0;
+  
+  //timing end
+  if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
+      std::cout << "PAPI ERROR" << std::endl;
+      //return -1;                                                                                                                                                                                                                           
   }
-  
-  
-
   //d * c^T
-  //dist_matrix = dataset_t * centroids;
+  dist_matrix = dataset_t * centroids;
 
-  double * data_ptr = dataset_t.memptr();
-  double * cent_ptr = centroids.memptr();
-  double * dist_ptr = dist_matrix.memptr();
-
+  // double * data_ptr = dataset_t.memptr();
+  // double * cent_ptr = centroids.memptr();
+  // double * dist_ptr = dist_matrix.memptr();
+  // dgemm('N', 'N', 
+  //     dataset_t.n_rows, 
+  //     centroids.n_cols, 
+  //     dataset_t.n_cols, 
+  //     1.0,
+  //     data_ptr, dataset_t.n_rows, 
+  //     cent_ptr, centroids.n_rows,
+  //     0.0,
+  //     dist_ptr, dist_matrix.n_rows);
 
 //timing end
-  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+  if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
       //return -1;                                                                                                                                                                                                                           
   }
-  std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
+  std::cout << "gemm time:" << gemm_real_time <<"---flpins:"<<gemm_flpins<< "---mflops:" << gemm_mflops << std::endl;
   PAPI_shutdown();
 
-
-  //timing start
-   if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-    }
+  float gemv_real_time = 0.0;
+  float gemv_proc_time = 0.0;
+  long long gemv_flpins = 0.0;
+  float gemv_mflops = 0.0;
 
 
-  dgemm('N', 'N', 
-  		dataset_t.n_rows, 
-  		centroids.n_cols, 
-  		dataset_t.n_cols, 
-  		1.0,
-  		data_ptr, dataset_t.n_rows, 
-  		cent_ptr, centroids.n_rows,
-  		0.0,
-  		dist_ptr, dist_matrix.n_rows);
-
- //timing end
-  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-  }
-  std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
-  PAPI_shutdown();
-
-
-  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+  if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
       //return -1;                                                                                                                                                                                                                           
   }
@@ -152,16 +134,23 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
 
   //timing end
-  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+  if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
       //return -1;                                                                                                                                                                                                                           
   }
-  std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
+  std::cout << "gemv_time:" << gemv_real_time <<"---flpins:"<<gemv_flpins<< "---mflops:" << gemv_mflops << std::endl;
   PAPI_shutdown();
+
+  srd::cout << "total time for dist calc: " << gemm_real_time + gemv_real_time << std::endl;
+
+  float other_real_time = 0.0;
+  float other_proc_time = 0.0;
+  long long other_flpins = 0.0;
+  float other_mflops = 0.0;
 
 
   //timing start
-   if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+   if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
       //return -1;                                                                                                                                                                                                                           
     }
@@ -192,14 +181,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
     counts(closestCluster)++;
   }
  
-//timing end
-  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-  }
-  std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
-  PAPI_shutdown();
-   
+
 
   // Now normalize the centroid.
   for (size_t i = 0; i < centroids.n_cols; ++i)
@@ -218,6 +200,16 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
         2.0);
   }
   distanceCalculations += centroids.n_cols;
+
+//timing end
+  if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
+      std::cout << "PAPI ERROR" << std::endl;
+      //return -1;                                                                                                                                                                                                                           
+  }
+  std::cout << "other time:" << other_real_time <<"---flpins:"<<other_flpins<< "---mflops:" << other_mflops << std::endl;
+  PAPI_shutdown();
+
+
 
   return std::sqrt(cNorm);
 }
