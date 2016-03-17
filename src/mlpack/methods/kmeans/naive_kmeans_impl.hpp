@@ -141,7 +141,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   std::cout << "gemv_time:" << gemv_real_time <<"---flpins:"<<gemv_flpins<< "---mflops:" << gemv_mflops << std::endl;
   PAPI_shutdown();
 
-  srd::cout << "total time for dist calc: " << gemm_real_time + gemv_real_time << std::endl;
+  std::cout << "total time for dist calc: " << gemm_real_time + gemv_real_time << std::endl;
 
   float other_real_time = 0.0;
   float other_proc_time = 0.0;
