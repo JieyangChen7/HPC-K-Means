@@ -58,32 +58,32 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
 
    
-
+//timing start
+  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+    std::cout << "PAPI ERROR" << std::endl;
+    //return -1;                                                                                                                                                                                                                           
+  }
   
   
 
   //d * c^T
   dist_matrix = dataset_t * centroids;
 
-  double * data_ptr = dataset_t.memptr();
-  double * cent_ptr = centroids.memptr();
-  double * dist_ptr = dist_matrix.memptr();
+  // double * data_ptr = dataset_t.memptr();
+  // double * cent_ptr = centroids.memptr();
+  // double * dist_ptr = dist_matrix.memptr();
 
-  dgemm('N', 'N', 
-  		dataset_t.n_rows, 
-  		centroids.n_cols, 
-  		dataset_t.n_cols, 
-  		1.0,
-  		data_ptr, dataset_t.n_rows, 
-  		cent_ptr, centroids.n_rows,
-  		0.0,
-  		dist_ptr, dist_matrix.n_rows);
+  // dgemm('N', 'N', 
+  // 		dataset_t.n_rows, 
+  // 		centroids.n_cols, 
+  // 		dataset_t.n_cols, 
+  // 		1.0,
+  // 		data_ptr, dataset_t.n_rows, 
+  // 		cent_ptr, centroids.n_rows,
+  // 		0.0,
+  // 		dist_ptr, dist_matrix.n_rows);
 
- //timing start
-  if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-    std::cout << "PAPI ERROR" << std::endl;
-    //return -1;                                                                                                                                                                                                                           
-  }
+ 
 
   // c * c^T
   arma::mat cct(1, centroids.n_cols);
