@@ -112,15 +112,15 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
     }
 
   //calculate distance
-  for (size_t i = 0; i < dataset.n_cols; i++)
-  {
-    // Find the closest centroid to this point.
-    for (size_t j = 0; j < centroids.n_cols; j++)
-    {
-      dist_matrix(i ,j) = metric.Evaluate(dataset.col(i), centroids.col(j));
+  // for (size_t i = 0; i < dataset.n_cols; i++)
+  // {
+  //   // Find the closest centroid to this point.
+  //   for (size_t j = 0; j < centroids.n_cols; j++)
+  //   {
+  //     dist_matrix(i ,j) = metric.Evaluate(dataset.col(i), centroids.col(j));
 
-    }
-  }
+  //   }
+  // }
 
 
 //timing end
