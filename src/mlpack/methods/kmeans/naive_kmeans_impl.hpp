@@ -48,25 +48,36 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 {
    newCentroids.zeros(centroids.n_rows, centroids.n_cols);
    counts.zeros(centroids.n_cols);
+    
 
-
+    /* this is our optimized way of calculating distance */
+    
+    /* initialize dist_matrix first */
     arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
     float gemm_real_time = 0.0;
     float gemm_proc_time = 0.0;
     long long gemm_flpins = 0.0;
     float gemm_mflops = 0.0;
   
-  //timing end
+  /* timing start (this only time dgemm) */
   if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
   }
-  //d * c^T
+    
+    
+  /* first part of our optimized approach: calculate d * c^T using dgemm */
+    
+  /* method 1 of dgemm: using native dgemm of ARMADILLO */
   dist_matrix = dataset_t * centroids;
 
+  /* method 2 of dgemm: using dgemm in ACML */
+  
+  /* get matrix pointer first */
   // double * data_ptr = dataset_t.memptr();
   // double * cent_ptr = centroids.memptr();
   // double * dist_ptr = dist_matrix.memptr();
+    
+  /* do dgemm by ACML*/
   // dgemm('N', 'N', 
   //     dataset_t.n_rows, 
   //     centroids.n_cols, 
@@ -77,10 +88,9 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   //     0.0,
   //     dist_ptr, dist_matrix.n_rows);
 
-//timing end
+  /* timing end(this only time dgemm) */
   if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
   }
   std::cout << "gemm time:" << gemm_real_time <<"---flpins:"<<gemm_flpins<< "---mflops:" << gemm_mflops << std::endl;
   PAPI_shutdown();
@@ -91,11 +101,14 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   float gemv_mflops = 0.0;
 
 
+  /* timing start (for the second part of our optimized approach) */
   if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
   }
-  // c * c^T
+    
+    
+  /* second part of our optimized approach: please see doc for detail*/
+    
   arma::mat cct(1, centroids.n_cols);
   arma::mat centroids_t = centroids.t();
   for (size_t i = 0; i < centroids.n_cols; i++)
@@ -119,27 +132,26 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
     dist_matrix.row(i) = dist_matrix.row(i) + cct;
   }
 
+  /* timing end (for the second part of our optimized approach) */
+  if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
+    std::cout << "PAPI ERROR" << std::endl;
+  }
+  std::cout << "gemv_time:" << gemv_real_time <<"---flpins:"<<gemv_flpins<< "---mflops:" << gemv_mflops << std::endl;
+  PAPI_shutdown();
 
-
-  //calculate distance
+    
+    
+  /* this is the original way of distance calculation */
   // for (size_t i = 0; i < dataset.n_cols; i++)
   // {
-  //   // Find the closest centroid to this point.
   //   for (size_t j = 0; j < centroids.n_cols; j++)
   //   {
   //     dist_matrix(i ,j) = metric.Evaluate(dataset.col(i), centroids.col(j));
-
   //   }
   // }
 
 
-  //timing end
-  if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-  }
-  std::cout << "gemv_time:" << gemv_real_time <<"---flpins:"<<gemv_flpins<< "---mflops:" << gemv_mflops << std::endl;
-  PAPI_shutdown();
+  
 
   std::cout << "total time for dist calc: " << gemm_real_time + gemv_real_time << std::endl;
 
@@ -149,11 +161,10 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   float other_mflops = 0.0;
 
 
-  //timing start
-   if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-    }
+  //timing start (this has to be done for both optimized and naive way)
+  if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
+    std::cout << "PAPI ERROR" << std::endl;
+  }
 
 
   // Find the closest centroid to each point and update the new centroids.
@@ -201,7 +212,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   }
   distanceCalculations += centroids.n_cols;
 
-//timing end
+  //timing end
   if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
       //return -1;                                                                                                                                                                                                                           
