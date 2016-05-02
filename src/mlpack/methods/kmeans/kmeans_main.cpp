@@ -256,7 +256,7 @@ void RunKMeans(const InitialPartitionPolicy& ipp)
 
     if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                          
+      //return -1;
     }
     */
 
@@ -265,11 +265,11 @@ void RunKMeans(const InitialPartitionPolicy& ipp)
     /*
     if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
       std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                          
+      //return -1;
     }
 
     std::cout << "time:" << real_time << "---mflops:" << mflops << std::endl;
-    PAPI_shutdown();    
+    PAPI_shutdown();
     */
     Timer::Stop("clustering");
 
@@ -319,15 +319,15 @@ void RunKMeans(const InitialPartitionPolicy& ipp)
     // std::cout<<"start"<<std::endl;
     // if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
     //   std::cout << "PAPI ERROR" << std::endl;
-    //   //return -1;                                                                                                                                                                                                                           
+    //   //return -1;
     // }
 
     // Just save the centroids.
     kmeans.Cluster(dataset, clusters, centroids, initialCentroidGuess);
-    if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
-      std::cout << "PAPI ERROR" << std::endl;
-      //return -1;                                                                                                                                                                                                                           
-    }
+    //if (PAPI_flops(&real_time, &proc_time, &flpins, &mflops) < PAPI_OK) {
+    //  std::cout << "PAPI ERROR" << std::endl;
+      //return -1;
+    //}
 
     // std::cout << "time:" << real_time <<"---flpins:"<<flpins<< "---mflops:" << mflops << std::endl;
     // PAPI_shutdown();
