@@ -102,6 +102,8 @@ information:
 
     $ cmake -D DEBUG=ON -D PROFILE=ON ../
 
+cmake -D BOOST_ROOT=/home/liberty/UCR/MLLIB/HPC-K-Means/boost -D ARMADILLO_INCLUDE_DIR=/home/liberty/UCR/MLLIB/HPC-K-Means/armadillo-6.700.4/include -D ARMADILLO_LIBRARY=/home/liberty/UCR/MLLIB/HPC-K-Means/armadillo-6.700.4/build ../
+
 Options are specified with the -D flag.  A list of options allowed:
 
     DEBUG=(ON/OFF): compile with debugging symbols

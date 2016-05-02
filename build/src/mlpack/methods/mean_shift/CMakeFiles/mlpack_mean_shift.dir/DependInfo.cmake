@@ -1,34 +1,35 @@
 # The set of languages for which implicit dependencies are needed:
-set(CMAKE_DEPENDS_LANGUAGES
+SET(CMAKE_DEPENDS_LANGUAGES
   "CXX"
   )
 # The set of files for implicit dependencies of each language:
-set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/jchen098/KMEANS/mlpack-2.0.1/src/mlpack/methods/mean_shift/mean_shift_main.cpp" "/home/jchen098/KMEANS/mlpack-2.0.1/build/src/mlpack/methods/mean_shift/CMakeFiles/mlpack_mean_shift.dir/mean_shift_main.cpp.o"
+SET(CMAKE_DEPENDS_CHECK_CXX
+  "/home/liberty/UCR/MLLIB/HPC-K-Means/src/mlpack/methods/mean_shift/mean_shift_main.cpp" "/home/liberty/UCR/MLLIB/HPC-K-Means/build/src/mlpack/methods/mean_shift/CMakeFiles/mlpack_mean_shift.dir/mean_shift_main.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "GNU")
+SET(CMAKE_CXX_COMPILER_ID "GNU")
 
 # Preprocessor definitions for this target.
-set(CMAKE_TARGET_DEFINITIONS_CXX
+SET(CMAKE_TARGET_DEFINITIONS
   "ARMA_NO_DEBUG"
   "BACKTRACE_FOUND"
   "BACKTRACE_HEADER=\"execinfo.h\""
   "BOOST_TEST_DYN_LINK"
   "NDEBUG"
-  )
-
-# The include file search paths:
-set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "/home/jchen098/KMEANS/armadillo-6.500.5/usr/include"
-  "/home/jchen098/KMEANS/boost_1_60_0"
-  "../"
-  "../src/mlpack/.."
+  "__MLPACK_GIT_VERSION"
   )
 
 # Targets to which this target links.
-set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/jchen098/KMEANS/mlpack-2.0.1/build/src/mlpack/CMakeFiles/mlpack.dir/DependInfo.cmake"
+SET(CMAKE_TARGET_LINKED_INFO_FILES
+  "/home/liberty/UCR/MLLIB/HPC-K-Means/build/src/mlpack/CMakeFiles/mlpack.dir/DependInfo.cmake"
   )
 
-# Fortran module output directory.
-set(CMAKE_Fortran_TARGET_MODULE_DIR "")
+# The include file search paths:
+SET(CMAKE_C_TARGET_INCLUDE_PATH
+  "../armadillo-6.700.4/include"
+  "../boost/include"
+  ".."
+  "../src/mlpack/.."
+  )
+SET(CMAKE_CXX_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})
+SET(CMAKE_Fortran_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})
+SET(CMAKE_ASM_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})

@@ -18,7 +18,8 @@
 
 // In case it hasn't been included yet.
 #include "naive_kmeans.hpp"
-
+#include "acml.h"
+//#include "papi.h"
 namespace mlpack {
 namespace kmeans {
 
@@ -28,16 +29,145 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
     dataset(dataset),
     metric(metric),
     distanceCalculations(0)
-{ /* Nothing to do. */ }
+{
+
+  ddt.zeros(dataset.n_cols, 1);
+  dataset_t = dataset.t();
+   for (size_t i = 0; i < dataset.n_cols; i++)
+   {
+     arma::mat temp = dataset.col(i) * dataset.col(i);
+     ddt(i, 0) = temp(0, 0);
+   }
+/* Nothing to do. */ }
 
 // Run a single iteration.
 template<typename MetricType, typename MatType>
-double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
+double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
                                                  arma::mat& newCentroids,
                                                  arma::Col<size_t>& counts)
 {
-  newCentroids.zeros(centroids.n_rows, centroids.n_cols);
-  counts.zeros(centroids.n_cols);
+   newCentroids.zeros(centroids.n_rows, centroids.n_cols);
+   counts.zeros(centroids.n_cols);
+
+
+    /* this is our optimized way of calculating distance */
+
+    /* initialize dist_matrix first */
+    arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
+   // float gemm_real_time = 0.0;
+   // float gemm_proc_time = 0.0;
+   // long long gemm_flpins = 0.0;
+   // float gemm_mflops = 0.0;
+
+  /* timing start (this only time dgemm) */
+  //if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
+  //    std::cout << "PAPI ERROR" << std::endl;
+  //}
+
+
+  /* first part of our optimized approach: calculate d * c^T using dgemm */
+
+  /* method 1 of dgemm: using native dgemm of ARMADILLO */
+  dist_matrix = dataset_t * centroids;
+
+  /* method 2 of dgemm: using dgemm in ACML */
+
+  /* get matrix pointer first */
+  // double * data_ptr = dataset_t.memptr();
+  // double * cent_ptr = centroids.memptr();
+  // double * dist_ptr = dist_matrix.memptr();
+
+  /* do dgemm by ACML*/
+  // dgemm('N', 'N',
+  //     dataset_t.n_rows,
+  //     centroids.n_cols,
+  //     dataset_t.n_cols,
+  //     1.0,
+  //     data_ptr, dataset_t.n_rows,
+  //     cent_ptr, centroids.n_rows,
+  //     0.0,
+  //     dist_ptr, dist_matrix.n_rows);
+
+  /* timing end(this only time dgemm) */
+  //if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
+  //    std::cout << "PAPI ERROR" << std::endl;
+  //}
+  //std::cout << "gemm time:" << gemm_real_time <<"---flpins:"<<gemm_flpins<< "---mflops:" << gemm_mflops << std::endl;
+  //PAPI_shutdown();
+
+  //float gemv_real_time = 0.0;
+  //float gemv_proc_time = 0.0;
+  //long long gemv_flpins = 0.0;
+  //float gemv_mflops = 0.0;
+
+
+  /* timing start (for the second part of our optimized approach) */
+  //if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
+  //    std::cout << "PAPI ERROR" << std::endl;
+  //}
+
+
+  /* second part of our optimized approach: please see doc for detail*/
+
+  arma::mat cct(centroids.n_cols, 1);
+  //arma::mat centroids_t = centroids.t();
+  for (size_t i = 0; i < centroids.n_cols; i++)
+  {
+    arma::mat temp = centroids.col(i) * centroids.col(i);
+    cct(i, 0) = temp(0, 0);
+  }
+
+  // d * c^T -> -2 * d * c^T
+  dist_matrix = -2 * dist_matrix;
+
+  // //d * d^T - 2 * d * c^T
+  for (size_t i = 0; i < centroids.n_cols; i++)
+  {
+    dist_matrix.col(i) = dist_matrix.col(i) + ddt;
+  }
+
+  //d * d^T + c * c^T - 2 * d * c^T
+  arma::mat dist_matrix_t = dist_matrix.t();
+  for (size_t i = 0; i < dataset.n_cols; i++)
+  {
+    dist_matrix_t.col(i) = dist_matrix_t.col(i) + cct;
+  }
+
+
+  /* timing end (for the second part of our optimized approach) */
+  //if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
+  //  std::cout << "PAPI ERROR" << std::endl;
+  //}
+  //std::cout << "gemv_time:" << gemv_real_time <<"---flpins:"<<gemv_flpins<< "---mflops:" << gemv_mflops << std::endl;
+  //PAPI_shutdown();
+
+
+
+  /* this is the original way of distance calculation */
+  // for (size_t i = 0; i < dataset.n_cols; i++)
+  // {
+  //   for (size_t j = 0; j < centroids.n_cols; j++)
+  //   {
+  //     dist_matrix(i ,j) = metric.Evaluate(dataset.col(i), centroids.col(j));
+  //   }
+  // }
+
+
+
+
+  //std::cout << "total time for dist calc: " << gemm_real_time + gemv_real_time << std::endl;
+
+  float other_real_time = 0.0;
+  float other_proc_time = 0.0;
+  long long other_flpins = 0.0;
+  float other_mflops = 0.0;
+
+
+  //timing start (this has to be done for both optimized and naive way)
+  //if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
+  //  std::cout << "PAPI ERROR" << std::endl;
+  //}
+
 
   // Find the closest centroid to each point and update the new centroids.
   for (size_t i = 0; i < dataset.n_cols; i++)
@@ -48,8 +178,8 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
 
     for (size_t j = 0; j < centroids.n_cols; j++)
     {
-      const double distance = metric.Evaluate(dataset.col(i), centroids.col(j));
-
+      const double distance = dist_matrix_t(j, i);
+      //const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
       if (distance < minDistance)
       {
         minDistance = distance;
@@ -63,6 +193,8 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
     newCentroids.col(closestCluster) += arma::vec(dataset.col(i));
     counts(closestCluster)++;
   }
+
+
 
   // Now normalize the centroid.
   for (size_t i = 0; i < centroids.n_cols; ++i)
@@ -81,6 +213,16 @@ double NaiveKMeans<MetricType, MatType>::Iterate(const arma::mat& centroids,
         2.0);
   }
   distanceCalculations += centroids.n_cols;
+
+  //timing end
+  //if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
+  //    std::cout << "PAPI ERROR" << std::endl;
+      //return -1;
+  //}
+  //std::cout << "other time:" << other_real_time <<"---flpins:"<<other_flpins<< "---mflops:" << other_mflops << std::endl;
+  //PAPI_shutdown();
+
+
 
   return std::sqrt(cNorm);
 }
