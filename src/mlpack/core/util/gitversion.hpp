@@ -1,1 +1,1 @@
-return "mlpack git-f52da7e";
+return "mlpack git-04c6693";

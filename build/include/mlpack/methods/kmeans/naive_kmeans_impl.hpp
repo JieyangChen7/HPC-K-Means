@@ -123,14 +123,14 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   // //d * d^T - 2 * d * c^T
   for (size_t i = 0; i < centroids.n_cols; i++)
   {
-    dist_matrix.col(i) = dist_matrix.col(i) + ddt;
+    dist_matrix.col(i) += ddt;
   }
 
   //d * d^T + c * c^T - 2 * d * c^T
   arma::mat dist_matrix_t = dist_matrix.t();
   for (size_t i = 0; i < dataset.n_cols; i++)
   {
-    dist_matrix_t.col(i) = dist_matrix_t.col(i) + cct;
+    dist_matrix_t.col(i) += cct;
   }
 
 
@@ -157,10 +157,10 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 
   //std::cout << "total time for dist calc: " << gemm_real_time + gemv_real_time << std::endl;
 
-  float other_real_time = 0.0;
-  float other_proc_time = 0.0;
-  long long other_flpins = 0.0;
-  float other_mflops = 0.0;
+  //float other_real_time = 0.0;
+  //float other_proc_time = 0.0;
+  //long long other_flpins = 0.0;
+  //float other_mflops = 0.0;
 
 
   //timing start (this has to be done for both optimized and naive way)
@@ -173,9 +173,10 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
   for (size_t i = 0; i < dataset.n_cols; i++)
   {
     // Find the closest centroid to this point.
-    double minDistance = std::numeric_limits<double>::infinity();
-    size_t closestCluster = centroids.n_cols; // Invalid value.
-
+    //double minDistance = std::numeric_limits<double>::infinity();
+    arma::uword closestCluster; // Invalid value.
+    dist_matrix_t.col(i).min(closestCluster);
+    /*
     for (size_t j = 0; j < centroids.n_cols; j++)
     {
       const double distance = dist_matrix_t(j, i);
@@ -186,11 +187,11 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
         closestCluster = j;
       }
     }
-
+	*/
     Log::Assert(closestCluster != centroids.n_cols);
 
     // We now have the minimum distance centroid index.  Update that centroid.
-    newCentroids.col(closestCluster) += arma::vec(dataset.col(i));
+    newCentroids.col(closestCluster) += dataset.col(i);
     counts(closestCluster)++;
   }
 

@@ -213,8 +213,8 @@ src/mlpack/preinstall: src/mlpack/tests/preinstall
 # Target rules for target src/mlpack/CMakeFiles/mlpack.dir
 
 # All Build rule for target.
-src/mlpack/CMakeFiles/mlpack.dir/all: CMakeFiles/mlpack_arma_config.dir/all
 src/mlpack/CMakeFiles/mlpack.dir/all: CMakeFiles/mlpack_gitversion.dir/all
+src/mlpack/CMakeFiles/mlpack.dir/all: CMakeFiles/mlpack_arma_config.dir/all
 src/mlpack/CMakeFiles/mlpack.dir/all: src/mlpack/CMakeFiles/mlpack_headers.dir/all
 	$(MAKE) -f src/mlpack/CMakeFiles/mlpack.dir/build.make src/mlpack/CMakeFiles/mlpack.dir/depend
 	$(MAKE) -f src/mlpack/CMakeFiles/mlpack.dir/build.make src/mlpack/CMakeFiles/mlpack.dir/build
