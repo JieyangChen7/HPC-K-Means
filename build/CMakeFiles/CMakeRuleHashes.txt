@@ -1,6 +1,8 @@
 # Hashes of file build rules.
-7e6a401644f21da374b20bf8d2446fce CMakeFiles/distclean
-3b159c8fe7f717c1cdd27b2a9a7e3acc CMakeFiles/doc
-0836f0f4d916c623b99d4bde8f55ca7d CMakeFiles/mlpack_arma_config
-c7dbe2a8338acc27a27b958d10c334df Doxyfile
-1dfbc3f443d2654c4599c210a9d63cee src/mlpack/CMakeFiles/test
+dd356b608e18be191193d1110bbc3807 CMakeFiles/distclean
+469c192c44dea30e2eb8e0ca2deb00d2 CMakeFiles/doc
+6cb3313df5db2fa6111b92785ed21dad CMakeFiles/mlpack_arma_config
+2fc91420cb1cf21da3e14d7a147f1ad7 CMakeFiles/mlpack_gitversion
+e4908de56e2858281aea85a064113434 Doxyfile
+64a111437fdebdba2c6767719574096f src/mlpack/CMakeFiles/mlpack_headers
+81bdb42c4272885240776188617df311 src/mlpack/CMakeFiles/test

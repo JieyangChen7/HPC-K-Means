@@ -146,7 +146,7 @@ Cluster(const MatType& data,
   LloydStepType<MetricType, MatType> lloydStep(data, metric);
   arma::mat centroidsOther;
   double cNorm;
-
+double st = clock();
   do
   {
     // We have two centroid matrices.  We don't want to copy anything, so,
@@ -179,7 +179,9 @@ Cluster(const MatType& data,
       cNorm = 1e-4; // Keep iterating.
 
   } while (cNorm > 1e-5 && iteration != maxIterations);
-
+    st = clock() -st;
+    st /= CLOCKS_PER_SEC;
+    printf("Time:%lfs\n",st);
   // If we ended on an even iteration, then the centroids are in the
   // centroidsOther matrix, and we need to steal its memory (steal_mem() avoids
   // a copy if possible).

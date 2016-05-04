@@ -47,7 +47,7 @@ class NaiveKMeans
    * @param centroids Current cluster centroids.
    * @param newCentroids New cluster centroids.
    */
-  double Iterate(const arma::mat& centroids,
+  double Iterate(arma::mat& centroids,
                  arma::mat& newCentroids,
                  arma::Col<size_t>& counts);
 
@@ -56,6 +56,11 @@ class NaiveKMeans
  private:
   //! The dataset.
   const MatType& dataset;
+
+  arma::mat ddt;
+
+  arma::mat dataset_t;
+
   //! The instantiated metric.
   MetricType& metric;
 

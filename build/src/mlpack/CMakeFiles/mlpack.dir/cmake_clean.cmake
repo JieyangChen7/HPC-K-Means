@@ -1,4 +1,4 @@
-file(REMOVE_RECURSE
+FILE(REMOVE_RECURSE
   "CMakeFiles/mlpack.dir/core/dists/discrete_distribution.cpp.o"
   "CMakeFiles/mlpack.dir/core/dists/gaussian_distribution.cpp.o"
   "CMakeFiles/mlpack.dir/core/dists/laplace_distribution.cpp.o"
@@ -49,6 +49,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang CXX)
-  include(CMakeFiles/mlpack.dir/cmake_clean_${lang}.cmake OPTIONAL)
-endforeach()
+FOREACH(lang CXX)
+  INCLUDE(CMakeFiles/mlpack.dir/cmake_clean_${lang}.cmake OPTIONAL)
+ENDFOREACH(lang)
