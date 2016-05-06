@@ -15,7 +15,7 @@
 #include "kmeans.hpp"
 
 #include <mlpack/core/metrics/lmetric.hpp>
-
+#include <time.h>
 namespace mlpack {
 namespace kmeans {
 
@@ -116,7 +116,9 @@ void KMeans<MetricType, InitialPartitionPolicy, EmptyClusterPolicy,
 	LloydStepType<MetricType, MatType> lloydStep(data, metric);
 	arma::mat centroidsOther;
 	double cNorm;
-	double st = clock();
+	struct timespec st,ed;
+	clock_gettime(CLOCK_REALTIME,&st);
+	std::cout << "Begin!" << std::endl;
 	do {
 		// We have two centroid matrices.  We don't want to copy anything, so,
 		// depending on the iteration number, we use a different centroid matrix...
@@ -147,9 +149,10 @@ void KMeans<MetricType, InitialPartitionPolicy, EmptyClusterPolicy,
 			cNorm = 1e-4; // Keep iterating.
 
 	} while (cNorm > 1e-5 && iteration != maxIterations);
-	st = clock() - st;
-	st /= CLOCKS_PER_SEC;
-	printf("Time:%lfs\n", st);
+	clock_gettime(CLOCK_REALTIME,&ed);
+	//st = clock() - st;
+	//st /= CLOCKS_PER_SEC;
+	printf("Time:%lfs\n", (double)ed.tv_sec - st.tv_sec);
 	// If we ended on an even iteration, then the centroids are in the
 	// centroidsOther matrix, and we need to steal its memory (steal_mem() avoids
 	// a copy if possible).

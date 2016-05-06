@@ -115,65 +115,70 @@ void MaxVarianceNewCluster::Precalculate(const MatType& data,
 	// dataset.
 	variances.zeros(oldCentroids.n_cols);
 	assignments.set_size(data.n_cols);
+
 	arma::mat dataset_t = data.t();
 	arma::mat dist_matrix(data.n_cols, oldCentroids.n_cols);
 	dist_matrix = dataset_t * oldCentroids;
-
 	arma::mat ddt(data.n_cols, 1);
-
+	double sum;
 	for (size_t i = 0; i < data.n_cols; i++) {
-		arma::mat temp = data.col(i) * data.col(i);
-		ddt(i, 0) = temp(0, 0);
+		sum = 0;
+		for (size_t j = 0; j < data.n_rows; j++)
+			sum += data(j, i) * data(j, i);
+		ddt(i, 0) = sum;
 	}
 	arma::mat cct(oldCentroids.n_cols, 1);
 	//arma::mat centroids_t = centroids.t();
 
 	for (size_t i = 0; i < oldCentroids.n_cols; i++) {
-		arma::mat temp = oldCentroids.col(i) * oldCentroids.col(i);
-		cct(i, 0) = temp(0, 0);
+		sum = 0;
+		for (size_t j = 0; j < oldCentroids.n_rows; j++)
+			sum += oldCentroids(j, i) * oldCentroids(j, i);
+		cct(i, 0) = sum;
 	}
 
 	// d * c^T -> -2 * d * c^T
 	dist_matrix = -2 * dist_matrix;
 
 	// //d * d^T - 2 * d * c^T
-	/*
-	 for (size_t i = 0; i < centroids.n_cols; i++) {
-	 dist_matrix.col(i) += ddt;
-	 }
-	 */
+
+	// for (size_t i = 0; i < centroids.n_cols; i++) {
+	// dist_matrix.col(i) += ddt;
+	// }
+
 	dist_matrix.each_col() += ddt;
 	//d * d^T + c * c^T - 2 * d * c^T
 	arma::mat dist_matrix_t = dist_matrix.t();
-	/*
-	 for (size_t i = 0; i < dataset.n_cols; i++) {
-	 dist_matrix_t.col(i) += cct; // for_each
-	 }
-	 */
+
+	// for (size_t i = 0; i < dataset.n_cols; i++) {
+	// dist_matrix_t.col(i) += cct; // for_each
+	// }
+
 	dist_matrix_t.each_col() += cct;
 	for (size_t i = 0; i < data.n_cols; i++) {
 		// Find the closest centroid to this point.
 		//double minDistance = std::numeric_limits<double>::infinity();
 		arma::uword closestCluster; // Invalid value.
 		dist_matrix_t.col(i).min(closestCluster);
-		/*
-		 for (size_t j = 0; j < centroids.n_cols; j++)
-		 {
-		 const double distance = dist_matrix_t(j, i);
-		 //const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
-		 if (distance < minDistance)
-		 {
-		 minDistance = distance;
-		 closestCluster = j;
-		 }
-		 }
-		 */
+
+		// for (size_t j = 0; j < centroids.n_cols; j++)
+		// {
+		// const double distance = dist_matrix_t(j, i);
+		//		 const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
+		//		 if (distance < minDistance)
+		//		 {
+		//		 minDistance = distance;
+		//		 closestCluster = j;
+		//		 }
+		//		 }
+
 		//Log::Assert(closestCluster != centroids.n_cols);
 		assignments[i] = closestCluster;
 		variances[closestCluster] += std::pow(
 				metric.Evaluate(data.col(i), oldCentroids.col(closestCluster)),
 				2.0);
 	}
+
 	// Add the variance of each point's distance away from the cluster.  I think
 	// this is the sensible thing to do.
 	/*

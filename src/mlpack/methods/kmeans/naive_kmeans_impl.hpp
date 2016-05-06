@@ -18,7 +18,7 @@
 
 // In case it hasn't been included yet.
 #include "naive_kmeans.hpp"
-#include "acml.h"
+//#include "acml.h"
 //#include "papi.h"
 namespace mlpack {
 namespace kmeans {
@@ -30,9 +30,12 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
 
 	ddt.zeros(dataset.n_cols, 1);
 	dataset_t = dataset.t();
+	double sum;
 	for (size_t i = 0; i < dataset.n_cols; i++) {
-		arma::mat temp = dataset.col(i) * dataset.col(i);
-		ddt(i, 0) = temp(0, 0);
+		sum = 0;
+		for (size_t j = 0; j < dataset.n_rows; j++)
+			sum += dataset(j, i) * dataset(j, i);
+		ddt(i, 0) = sum;
 	}
 	/* Nothing to do. */}
 
@@ -52,22 +55,16 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 	// long long gemm_flpins = 0.0;
 	// float gemm_mflops = 0.0;
 
-	/* timing start (this only time dgemm) */
 	//if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
 	//    std::cout << "PAPI ERROR" << std::endl;
 	//}
-	/* first part of our optimized approach: calculate d * c^T using dgemm */
 
-	/* method 1 of dgemm: using native dgemm of ARMADILLO */
 	dist_matrix = dataset_t * centroids;
 
-	/* method 2 of dgemm: using dgemm in ACML */
-
-	/* get matrix pointer first */
 	// double * data_ptr = dataset_t.memptr();
 	// double * cent_ptr = centroids.memptr();
 	// double * dist_ptr = dist_matrix.memptr();
-	/* do dgemm by ACML*/
+
 	// dgemm('N', 'N',
 	//     dataset_t.n_rows,
 	//     centroids.n_cols,
@@ -77,7 +74,7 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 	//     cent_ptr, centroids.n_rows,
 	//     0.0,
 	//     dist_ptr, dist_matrix.n_rows);
-	/* timing end(this only time dgemm) */
+
 	//if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
 	//    std::cout << "PAPI ERROR" << std::endl;
 	//}
@@ -87,45 +84,46 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 	//float gemv_proc_time = 0.0;
 	//long long gemv_flpins = 0.0;
 	//float gemv_mflops = 0.0;
-	/* timing start (for the second part of our optimized approach) */
+
 	//if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
 	//    std::cout << "PAPI ERROR" << std::endl;
 	//}
-	/* second part of our optimized approach: please see doc for detail*/
 
 	arma::mat cct(centroids.n_cols, 1);
 	//arma::mat centroids_t = centroids.t();
-
+	double sum;
 	for (size_t i = 0; i < centroids.n_cols; i++) {
-		arma::mat temp = centroids.col(i) * centroids.col(i);
-		cct(i, 0) = temp(0, 0);
+		sum = 0;
+		for (size_t j = 0; j < centroids.n_rows; j++)
+			sum += centroids(j, i) * centroids(j, i);
+		cct(i, 0) = sum;
 	}
 
 	// d * c^T -> -2 * d * c^T
 	dist_matrix = -2 * dist_matrix;
 
 	// //d * d^T - 2 * d * c^T
-	/*
-	for (size_t i = 0; i < centroids.n_cols; i++) {
-		dist_matrix.col(i) += ddt;
-	}
-	*/
+
+//	for (size_t i = 0; i < centroids.n_cols; i++) {
+//		dist_matrix.col(i) += ddt;
+//	}
+
 	dist_matrix.each_col() += ddt;
 	//d * d^T + c * c^T - 2 * d * c^T
 	arma::mat dist_matrix_t = dist_matrix.t();
-	/*
-	for (size_t i = 0; i < dataset.n_cols; i++) {
-		dist_matrix_t.col(i) += cct; // for_each
-	}
-	*/
+
+	//for (size_t i = 0; i < dataset.n_cols; i++) {
+//		dist_matrix_t.col(i) += cct; // for_each
+//	}
+
 	dist_matrix_t.each_col() += cct;
-	/* timing end (for the second part of our optimized approach) */
+
 	//if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
 	//  std::cout << "PAPI ERROR" << std::endl;
 	//}
 	//std::cout << "gemv_time:" << gemv_real_time <<"---flpins:"<<gemv_flpins<< "---mflops:" << gemv_mflops << std::endl;
 	//PAPI_shutdown();
-	/* this is the original way of distance calculation */
+
 	// for (size_t i = 0; i < dataset.n_cols; i++)
 	// {
 	//   for (size_t j = 0; j < centroids.n_cols; j++)
@@ -148,18 +146,18 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 		//double minDistance = std::numeric_limits<double>::infinity();
 		arma::uword closestCluster; // Invalid value.
 		dist_matrix_t.col(i).min(closestCluster);
-		/*
-		 for (size_t j = 0; j < centroids.n_cols; j++)
-		 {
-		 const double distance = dist_matrix_t(j, i);
-		 //const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
-		 if (distance < minDistance)
-		 {
-		 minDistance = distance;
-		 closestCluster = j;
-		 }
-		 }
-		 */
+
+//		 for (size_t j = 0; j < centroids.n_cols; j++)
+//		 {
+//		 const double distance = dist_matrix_t(j, i);
+//		 const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
+//		 if (distance < minDistance)
+//		 {
+//		 minDistance = distance;
+//		 closestCluster = j;
+//		 }
+//		 }
+
 		Log::Assert(closestCluster != centroids.n_cols);
 
 		// We now have the minimum distance centroid index.  Update that centroid.
