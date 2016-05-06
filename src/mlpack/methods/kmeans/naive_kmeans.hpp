@@ -29,43 +29,51 @@ namespace kmeans {
  * @param MatType Matrix type (arma::mat or arma::sp_mat).
  */
 template<typename MetricType, typename MatType>
-class NaiveKMeans
-{
- public:
-  /**
-   * Construct the NaiveKMeans object with the given dataset and metric.
-   *
-   * @param dataset Dataset.
-   * @param metric Instantiated metric.
-   */
-  NaiveKMeans(const MatType& dataset, MetricType& metric);
+class NaiveKMeans {
+public:
+	/**
+	 * Construct the NaiveKMeans object with the given dataset and metric.
+	 *
+	 * @param dataset Dataset.
+	 * @param metric Instantiated metric.
+	 */
+	NaiveKMeans(const MatType& dataset, MetricType& metric);
 
-  /**
-   * Run a single iteration of the Lloyd algorithm, updating the given centroids
-   * into the newCentroids matrix.
-   *
-   * @param centroids Current cluster centroids.
-   * @param newCentroids New cluster centroids.
-   */
-  double Iterate(arma::mat& centroids,
-                 arma::mat& newCentroids,
-                 arma::Col<size_t>& counts);
+	/**
+	 * Run a single iteration of the Lloyd algorithm, updating the given centroids
+	 * into the newCentroids matrix.
+	 *
+	 * @param centroids Current cluster centroids.
+	 * @param newCentroids New cluster centroids.
+	 */
+	double Iterate(arma::mat& centroids, arma::mat& newCentroids,
+			arma::Col<size_t>& counts);
 
-  size_t DistanceCalculations() const { return distanceCalculations; }
+	size_t DistanceCalculations() const {
+		return distanceCalculations;
+	}
 
- private:
-  //! The dataset.
-  const MatType& dataset;
+	int EmptyClusterAdjust(const MatType& data, const size_t emptyCluster,
+				const arma::mat& oldCentroids, arma::mat& newCentroids,
+				arma::Col<size_t>& clusterCounts, MetricType& metric,
+				const size_t iteration);
+private:
+	//! The dataset.
+	const MatType& dataset;
 
-  arma::mat ddt;
+	arma::mat ddt;
 
-  arma::mat dataset_t;
+	arma::mat dataset_t;
+	arma::vec variances;
+	//! Cached assignments for each point.
+	arma::Row<size_t> assignments;
+	//! The instantiated metric.
+	MetricType& metric;
+	size_t iteration;
+	//! Number of distance calculations.
+	size_t distanceCalculations;
 
-  //! The instantiated metric.
-  MetricType& metric;
 
-  //! Number of distance calculations.
-  size_t distanceCalculations;
 };
 
 } // namespace kmeans

@@ -27,7 +27,6 @@ template<typename MetricType, typename MatType>
 NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
 		MetricType& metric) :
 		dataset(dataset), metric(metric), distanceCalculations(0) {
-
 	ddt.zeros(dataset.n_cols, 1);
 	dataset_t = dataset.t();
 	double sum;
@@ -37,60 +36,90 @@ NaiveKMeans<MetricType, MatType>::NaiveKMeans(const MatType& dataset,
 			sum += dataset(j, i) * dataset(j, i);
 		ddt(i, 0) = sum;
 	}
-	/* Nothing to do. */}
+
+}
+
+template<typename MetricType, typename MatType>
+int NaiveKMeans<MetricType, MatType>::EmptyClusterAdjust(const MatType& data,
+		const size_t emptyCluster, const arma::mat& oldCentroids,
+		arma::mat& newCentroids, arma::Col<size_t>& clusterCounts,
+		MetricType& metric, const size_t iteration) {
+	this->iteration = iteration;
+
+	// Now find the cluster with maximum variance.
+	arma::uword maxVarCluster = 0;
+	variances.max(maxVarCluster);
+
+	// If the cluster with maximum variance has variance of 0, then we can't
+	// continue.  All the points are the same.
+	if (variances[maxVarCluster] == 0.0)
+		return 0;
+
+	// Now, inside this cluster, find the point which is furthest away.
+	size_t furthestPoint = data.n_cols;
+	double maxDistance = -DBL_MAX;
+	for (size_t i = 0; i < data.n_cols; ++i) {
+		if (assignments[i] == maxVarCluster) {
+			const double distance = std::pow(
+					metric.Evaluate(data.col(i),
+							newCentroids.col(maxVarCluster)), 2.0);
+
+			if (distance > maxDistance) {
+				maxDistance = distance;
+				furthestPoint = i;
+			}
+		}
+	}
+
+	// Take that point and add it to the empty cluster.
+	newCentroids.col(maxVarCluster) *= (double(clusterCounts[maxVarCluster])
+			/ double(clusterCounts[maxVarCluster] - 1));
+	newCentroids.col(maxVarCluster) -= (1.0
+			/ (clusterCounts[maxVarCluster] - 1.0))
+			* arma::vec(data.col(furthestPoint));
+	clusterCounts[maxVarCluster]--;
+	clusterCounts[emptyCluster]++;
+	newCentroids.col(emptyCluster) = arma::vec(data.col(furthestPoint));
+	assignments[furthestPoint] = emptyCluster;
+
+	// Modify the variances, as necessary.
+	variances[emptyCluster] = 0;
+	// One has already been subtracted from clusterCounts[maxVarCluster].  If
+	// EmptyCluster() is called again, we can't pull another point from
+	// maxVarCluster (we'd be making an empty cluster), so force a call to
+	// Precalculate() if EmptyCluster() is called again by changing
+	// this->iteration.
+	if (clusterCounts[maxVarCluster] <= 1) {
+		variances[maxVarCluster] = 0;
+		--this->iteration;
+	} else {
+		variances[maxVarCluster] = (1.0 / clusterCounts[maxVarCluster])
+				* ((clusterCounts[maxVarCluster] + 1) * variances[maxVarCluster]
+						- maxDistance);
+	}
+
+	// Output some debugging information.
+	Log::Debug << "Point " << furthestPoint << " assigned to empty cluster "
+			<< emptyCluster << ".\n";
+
+	return 1; // We only changed one point.
+
+}
 
 // Run a single iteration.
 template<typename MetricType, typename MatType>
 double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 		arma::mat& newCentroids, arma::Col<size_t>& counts) {
+
 	newCentroids.zeros(centroids.n_rows, centroids.n_cols);
 	counts.zeros(centroids.n_cols);
+	variances.zeros(centroids.n_cols);
+	assignments.set_size(dataset.n_cols);
 
-	/* this is our optimized way of calculating distance */
-
-	/* initialize dist_matrix first */
 	arma::mat dist_matrix(dataset.n_cols, centroids.n_cols);
-	// float gemm_real_time = 0.0;
-	// float gemm_proc_time = 0.0;
-	// long long gemm_flpins = 0.0;
-	// float gemm_mflops = 0.0;
-
-	//if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
-	//    std::cout << "PAPI ERROR" << std::endl;
-	//}
-
 	dist_matrix = dataset_t * centroids;
-
-	// double * data_ptr = dataset_t.memptr();
-	// double * cent_ptr = centroids.memptr();
-	// double * dist_ptr = dist_matrix.memptr();
-
-	// dgemm('N', 'N',
-	//     dataset_t.n_rows,
-	//     centroids.n_cols,
-	//     dataset_t.n_cols,
-	//     1.0,
-	//     data_ptr, dataset_t.n_rows,
-	//     cent_ptr, centroids.n_rows,
-	//     0.0,
-	//     dist_ptr, dist_matrix.n_rows);
-
-	//if (PAPI_flops(&gemm_real_time, &gemm_proc_time, &gemm_flpins, &gemm_mflops) < PAPI_OK) {
-	//    std::cout << "PAPI ERROR" << std::endl;
-	//}
-	//std::cout << "gemm time:" << gemm_real_time <<"---flpins:"<<gemm_flpins<< "---mflops:" << gemm_mflops << std::endl;
-	//PAPI_shutdown();
-	//float gemv_real_time = 0.0;
-	//float gemv_proc_time = 0.0;
-	//long long gemv_flpins = 0.0;
-	//float gemv_mflops = 0.0;
-
-	//if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
-	//    std::cout << "PAPI ERROR" << std::endl;
-	//}
-
 	arma::mat cct(centroids.n_cols, 1);
-	//arma::mat centroids_t = centroids.t();
+
 	double sum;
 	for (size_t i = 0; i < centroids.n_cols; i++) {
 		sum = 0;
@@ -98,71 +127,25 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 			sum += centroids(j, i) * centroids(j, i);
 		cct(i, 0) = sum;
 	}
-
-	// d * c^T -> -2 * d * c^T
 	dist_matrix = -2 * dist_matrix;
-
-	// //d * d^T - 2 * d * c^T
-
-//	for (size_t i = 0; i < centroids.n_cols; i++) {
-//		dist_matrix.col(i) += ddt;
-//	}
-
 	dist_matrix.each_col() += ddt;
-	//d * d^T + c * c^T - 2 * d * c^T
 	arma::mat dist_matrix_t = dist_matrix.t();
-
-	//for (size_t i = 0; i < dataset.n_cols; i++) {
-//		dist_matrix_t.col(i) += cct; // for_each
-//	}
-
 	dist_matrix_t.each_col() += cct;
 
-	//if (PAPI_flops(&gemv_real_time, &gemv_proc_time, &gemv_flpins, &gemv_mflops) < PAPI_OK) {
-	//  std::cout << "PAPI ERROR" << std::endl;
-	//}
-	//std::cout << "gemv_time:" << gemv_real_time <<"---flpins:"<<gemv_flpins<< "---mflops:" << gemv_mflops << std::endl;
-	//PAPI_shutdown();
-
-	// for (size_t i = 0; i < dataset.n_cols; i++)
-	// {
-	//   for (size_t j = 0; j < centroids.n_cols; j++)
-	//   {
-	//     dist_matrix(i ,j) = metric.Evaluate(dataset.col(i), centroids.col(j));
-	//   }
-	// }
-	//std::cout << "total time for dist calc: " << gemm_real_time + gemv_real_time << std::endl;
-	//float other_real_time = 0.0;
-	//float other_proc_time = 0.0;
-	//long long other_flpins = 0.0;
-	//float other_mflops = 0.0;
-	//timing start (this has to be done for both optimized and naive way)
-	//if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
-	//  std::cout << "PAPI ERROR" << std::endl;
-	//}
-	// Find the closest centroid to each point and update the new centroids.
 	for (size_t i = 0; i < dataset.n_cols; i++) {
-		// Find the closest centroid to this point.
-		//double minDistance = std::numeric_limits<double>::infinity();
+
 		arma::uword closestCluster; // Invalid value.
 		dist_matrix_t.col(i).min(closestCluster);
-
-//		 for (size_t j = 0; j < centroids.n_cols; j++)
-//		 {
-//		 const double distance = dist_matrix_t(j, i);
-//		 const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
-//		 if (distance < minDistance)
-//		 {
-//		 minDistance = distance;
-//		 closestCluster = j;
-//		 }
-//		 }
 
 		Log::Assert(closestCluster != centroids.n_cols);
 
 		// We now have the minimum distance centroid index.  Update that centroid.
 		newCentroids.col(closestCluster) += dataset.col(i);
 		++counts(closestCluster);
+		assignments[i] = closestCluster;
+		variances[closestCluster] += std::pow(
+				metric.Evaluate(dataset.col(i), centroids.col(closestCluster)),
+				2.0);
 	}
 
 	// Now normalize the centroid.
@@ -182,13 +165,11 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 	}
 	distanceCalculations += centroids.n_cols;
 
-	//timing end
-	//if (PAPI_flops(&other_real_time, &other_proc_time, &other_flpins, &other_mflops) < PAPI_OK) {
-	//    std::cout << "PAPI ERROR" << std::endl;
-	//return -1;
-	//}
-	//std::cout << "other time:" << other_real_time <<"---flpins:"<<other_flpins<< "---mflops:" << other_mflops << std::endl;
-	//PAPI_shutdown();
+	for (size_t i = 0; i < counts.n_elem; ++i)
+		if (counts[i] <= 1)
+			variances[i] = 0;
+		else
+			variances[i] /= counts[i];
 
 	return std::sqrt(cNorm);
 }

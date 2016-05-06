@@ -137,75 +137,23 @@ void MaxVarianceNewCluster::Precalculate(const MatType& data,
 		cct(i, 0) = sum;
 	}
 
-	// d * c^T -> -2 * d * c^T
 	dist_matrix = -2 * dist_matrix;
 
-	// //d * d^T - 2 * d * c^T
-
-	// for (size_t i = 0; i < centroids.n_cols; i++) {
-	// dist_matrix.col(i) += ddt;
-	// }
 
 	dist_matrix.each_col() += ddt;
-	//d * d^T + c * c^T - 2 * d * c^T
-	arma::mat dist_matrix_t = dist_matrix.t();
 
-	// for (size_t i = 0; i < dataset.n_cols; i++) {
-	// dist_matrix_t.col(i) += cct; // for_each
-	// }
+	arma::mat dist_matrix_t = dist_matrix.t();
 
 	dist_matrix_t.each_col() += cct;
 	for (size_t i = 0; i < data.n_cols; i++) {
-		// Find the closest centroid to this point.
-		//double minDistance = std::numeric_limits<double>::infinity();
-		arma::uword closestCluster; // Invalid value.
+		arma::uword closestCluster;
 		dist_matrix_t.col(i).min(closestCluster);
-
-		// for (size_t j = 0; j < centroids.n_cols; j++)
-		// {
-		// const double distance = dist_matrix_t(j, i);
-		//		 const double distance = pow(dist_matrix(i, j), (1.0 / 2.0));
-		//		 if (distance < minDistance)
-		//		 {
-		//		 minDistance = distance;
-		//		 closestCluster = j;
-		//		 }
-		//		 }
-
-		//Log::Assert(closestCluster != centroids.n_cols);
 		assignments[i] = closestCluster;
 		variances[closestCluster] += std::pow(
 				metric.Evaluate(data.col(i), oldCentroids.col(closestCluster)),
 				2.0);
 	}
 
-	// Add the variance of each point's distance away from the cluster.  I think
-	// this is the sensible thing to do.
-	/*
-	for (size_t i = 0; i < data.n_cols; ++i) {
-		// Find the closest centroid to this point.
-		double minDistance = std::numeric_limits<double>::infinity();
-		size_t closestCluster = oldCentroids.n_cols; // Invalid value.
-
-		for (size_t j = 0; j < oldCentroids.n_cols; j++) {
-			const double distance = metric.Evaluate(data.col(i),
-					oldCentroids.col(j));
-
-			if (distance < minDistance) {
-				minDistance = distance;
-				closestCluster = j;
-			}
-		}
-
-		assignments[i] = closestCluster;
-		variances[closestCluster] += std::pow(
-				metric.Evaluate(data.col(i), oldCentroids.col(closestCluster)),
-				2.0);
-	}
-	*/
-	// Divide by the number of points in the cluster to produce the variance,
-	// unless the cluster is empty or contains only one point, in which case we
-	// set the variance to 0.
 	for (size_t i = 0; i < clusterCounts.n_elem; ++i)
 		if (clusterCounts[i] <= 1)
 			variances[i] = 0;
