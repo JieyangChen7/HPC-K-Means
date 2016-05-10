@@ -1,7 +1,0 @@
-ACML (AMD Core Math Library) version 5.3.1.182  (for 8-byte integers) (Mon Apr 15 04:04:00 CDT 2013)
-Copyright AMD,NAG 2013
-Build system: Linux 3.0.13-0.27-default x86_64 acml-build-lin2
-Built using Fortran compiler: GNU Fortran (GCC) 4.7.1
-   with flags:  -ffixed-line-length-132 -Wall -W -Wno-unused -Wno-unused-dummy-argument -Wno-conversion -Wno-uninitialized -fPIC -fno-second-underscore -fimplicit-none -DUSE_OMP -fopenmp -DUSE_ACMLMALLOCFAST -m64 -DIS_64BIT -msse2 -fdefault-integer-8 -DINTEGER64 -O3
- and C compiler: gcc (GCC) 4.7.1
-   with flags:  -W -Wno-unused-parameter -Wstrict-prototypes -Wwrite-strings -D_GNU_SOURCE -D_ISOC99_SOURCE -fPIC  -DUSE_OMP -fopenmp -DUSE_ACMLMALLOCFAST -m64 -DIS_64BIT -mstackrealign -msse2 -DINTEGER64 -O3
