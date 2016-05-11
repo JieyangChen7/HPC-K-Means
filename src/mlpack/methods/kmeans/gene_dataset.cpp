@@ -10,7 +10,7 @@ using namespace std;
 int main(){
   for (int i = 0; i < DATA; i++) {
     for (int j = 0; j < FEATURE; j++) {
-      cout << (double)rand() / RAND_MAX;
+      cout << ((double)rand() / RAND_MAX)*1000;
       if (j < FEATURE - 1) {
 	cout << ",";
       }
