@@ -158,9 +158,9 @@ double NaiveKMeans<MetricType, MatType>::Iterate(arma::mat& centroids,
 	distanceCalculations += centroids.n_cols * dataset.n_cols;
 
 	// Calculate cluster distortion for this iteration.
-	double cNorm;
+	double cNorm = 0.0;
 	for (size_t i = 0; i < centroids.n_cols; ++i) {
-		cNorm = std::pow(metric.Evaluate(centroids.col(i), newCentroids.col(i)),
+		cNorm += std::pow(metric.Evaluate(centroids.col(i), newCentroids.col(i)),
 				2.0);
 	}
 	distanceCalculations += centroids.n_cols;

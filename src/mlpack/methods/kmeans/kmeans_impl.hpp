@@ -143,6 +143,7 @@ void KMeans<MetricType, InitialPartitionPolicy, EmptyClusterPolicy,
 		}
 
 		iteration++;
+		std::cout << "Iteration" << iteration << std::endl;
 		Log::Info << "KMeans::Cluster(): iteration " << iteration
 				<< ", residual " << cNorm << ".\n";
 		if (isnan(cNorm) || isinf(cNorm))
