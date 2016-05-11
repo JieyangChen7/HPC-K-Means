@@ -153,6 +153,8 @@ void KMeans<MetricType, InitialPartitionPolicy, EmptyClusterPolicy,
 	//st = clock() - st;
 	//st /= CLOCKS_PER_SEC;
 	printf("Time:%lfs\n", (double)ed.tv_sec - st.tv_sec);
+    printf("iteration:%ds\n", iteration);
+
 	// If we ended on an even iteration, then the centroids are in the
 	// centroidsOther matrix, and we need to steal its memory (steal_mem() avoids
 	// a copy if possible).
